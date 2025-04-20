@@ -626,7 +626,7 @@ void WriteNpy(std::string _file, int3 _grid_dim, const T* _data)
     npy::write_npy<T>(_file, d);
 }
 
-void WriteFloat3Npy(std::string _file, int3 _grid_dim, const float3* _data)
+void WriteVec3fNpy(std::string _file, int3 _grid_dim, const openvdb::Vec3f* _data)
 {
     npy::npy_data<float> d;
     int size = _grid_dim.x * _grid_dim.y * _grid_dim.z;
@@ -634,9 +634,9 @@ void WriteFloat3Npy(std::string _file, int3 _grid_dim, const float3* _data)
     d.shape = { (unsigned long int)(_grid_dim.x), (unsigned long int)(_grid_dim.y), (unsigned long int)(_grid_dim.z), 3 };
     d.fortran_order = false;
     for (int i = 0; i < size; i++) {
-        d.data[3 * i] = _data[i].x;
-        d.data[3 * i + 1] = _data[i].y;
-        d.data[3 * i + 2] = _data[i].z;
+        d.data[3 * i] = _data[i][0];
+        d.data[3 * i + 1] = _data[i][1];
+        d.data[3 * i + 2] = _data[i][2];
     }
     npy::write_npy<float>(_file, d);
 }
@@ -651,4 +651,16 @@ void WriteFloatGridNpy(std::string _file, int3 _grid_dim, openvdb::FloatGrid::Pt
 			for(int k = 0; k < _grid_dim.z; k++)
 				data[i * _grid_dim.y * _grid_dim.z + j * _grid_dim.z + k] = axr.getValue(openvdb::Coord(i, j, k));
 	WriteNpy<float>(_file, _grid_dim, data.data());
+}
+
+void WriteVec3fGridNpy(std::string _file, int3 _grid_dim, openvdb::Vec3fGrid::Ptr _vec3f_grid)
+{
+    std::vector<openvdb::Vec3f> data;
+	data.resize(_grid_dim.x * _grid_dim.y * _grid_dim.z);
+	auto axr{ _vec3f_grid->getConstUnsafeAccessor() };
+	for (int i = 0; i < _grid_dim.x; i++)
+		for (int j = 0; j < _grid_dim.y; j++)
+            for (int k = 0; k < _grid_dim.z; k++)
+                data[i * _grid_dim.y * _grid_dim.z + j * _grid_dim.z + k] = axr.getValue(openvdb::Coord(i, j, k));
+	WriteVec3fNpy(_file, _grid_dim, data.data());
 }

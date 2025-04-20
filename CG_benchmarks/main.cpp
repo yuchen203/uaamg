@@ -1714,7 +1714,7 @@ int main(int argc, char** argv) {
 		voxelSize,
 		3.0f 
 	);
-	
-	WriteFloatGridNpy("sphere.npy", { 128, 128, 128 }, grid);
+	auto result_face_weight = openvdb::Vec3fGrid::create(openvdb::Vec3f{ 1.0f, 2.0f, 3.0f });
+	WriteVec3fGridNpy("weight.npy", { 128, 128, 128 }, result_face_weight);
 	return 0;
 }
