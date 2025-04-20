@@ -1674,29 +1674,47 @@ void benchmark_viscosity() {
 }
 
 
+//int main(int argc, char** argv) {
+//	if (argc != 2) {
+//		printf("Usage: CG_benchmark configuration_file_name.yaml\n");
+//		exit(0);
+//	}
+//
+//	//try to open the file
+//	FILE* pFile = fopen(argv[1], "r");
+//	if (pFile == nullptr) {
+//		printf("configuration file %s does not exist\n", argv[1]);
+//		exit(0);
+//	}
+//	fclose(pFile);
+//
+//	YamlSingleton::loadfile(argv[1]);
+//	CSim::TimerMan::timer("Benchmark").start();
+//	if (YamlSingleton::get()["equation_type"].as<std::string>() == "pressure") {
+//		benchmark_poisson();
+//	}
+//	if (YamlSingleton::get()["equation_type"].as<std::string>() == "viscosity") {
+//		benchmark_viscosity();
+//	}
+//	CSim::TimerMan::timer("Benchmark").stop();
+//	std::cout << "Benchmark time " << CSim::TimerMan::timer("Benchmark").lasttime() << std::endl;
+//	return 0;
+//}
+
+#include "npyio/vdb_npy_io.h"
+
 int main(int argc, char** argv) {
-	if (argc != 2) {
-		printf("Usage: CG_benchmark configuration_file_name.yaml\n");
-		exit(0);
-	}
-
-	//try to open the file
-	FILE* pFile = fopen(argv[1], "r");
-	if (pFile == nullptr) {
-		printf("configuration file %s does not exist\n", argv[1]);
-		exit(0);
-	}
-	fclose(pFile);
-
-	YamlSingleton::loadfile(argv[1]);
-	CSim::TimerMan::timer("Benchmark").start();
-	if (YamlSingleton::get()["equation_type"].as<std::string>() == "pressure") {
-		benchmark_poisson();
-	}
-	if (YamlSingleton::get()["equation_type"].as<std::string>() == "viscosity") {
-		benchmark_viscosity();
-	}
-	CSim::TimerMan::timer("Benchmark").stop();
-	std::cout << "Benchmark time " << CSim::TimerMan::timer("Benchmark").lasttime() << std::endl;
+	openvdb::initialize();
+	const float voxelSize = 1.0f / 128.0f;
+	openvdb::Vec3f center(0.5f, 0.5f, 0.5f);
+	float radius = 0.2f;
+	openvdb::FloatGrid::Ptr grid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid>(
+		radius,
+		center, 
+		voxelSize,
+		3.0f 
+	);
+	
+	WriteFloatGridNpy("sphere.npy", { 128, 128, 128 }, grid);
 	return 0;
 }
